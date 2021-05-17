@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:chap_app/models/usuarios.dart';
+import 'package:chap_app/services/auth_service.dart';
+import 'package:provider/provider.dart';
+
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UsuariosPage extends StatefulWidget {
@@ -13,24 +16,32 @@ class _UsuariosPageState extends State<UsuariosPage> {
       RefreshController(initialRefresh: false);
 
   final usuarios = [
-    Usuario(uid: '1', nombre: 'Sammy', email: 'test1@test.com', online: true),
-    Usuario(uid: '2', nombre: 'David', email: 'test2@test.com', online: true),
-    Usuario(uid: '3', nombre: 'Pao', email: 'test3@test.com', online: false),
+    Usuario(uid: '1', name: 'Sammy', email: 'test1@test.com', online: true),
+    Usuario(uid: '2', name: 'David', email: 'test2@test.com', online: true),
+    Usuario(uid: '3', name: 'Pao', email: 'test3@test.com', online: false),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
+    final usuario = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Mi Nombre',
+          usuario.name,
           style: TextStyle(color: Colors.black54),
         ),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon(Icons.exit_to_app, color: Colors.black54),
-          onPressed: () {},
+          onPressed: () {
+            // TODO: Desconectar el socket server
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthService.deleteToken();
+          },
         ),
         actions: <Widget>[
           Container(
@@ -64,10 +75,10 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   ListTile _usuarioListTile(Usuario usuario) {
     return ListTile(
-      title: Text(usuario.nombre),
+      title: Text(usuario.name),
       subtitle: Text(usuario.email),
       leading: CircleAvatar(
-        child: Text(usuario.nombre.substring(0, 2)),
+        child: Text(usuario.name.substring(0, 2)),
         backgroundColor: Colors.blue[100],
       ),
       trailing: Container(

@@ -1,6 +1,9 @@
-import 'package:chap_app/widgets/boton_azul.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:chap_app/helpers/mostrar_alerta.dart';
+import 'package:chap_app/services/auth_service.dart';
+import 'package:chap_app/widgets/boton_azul.dart';
 import 'package:chap_app/widgets/custum_input.dart';
 import 'package:chap_app/widgets/labels.dart';
 import 'package:chap_app/widgets/logo.dart';
@@ -52,6 +55,8 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -76,9 +81,22 @@ class __FormState extends State<_Form> {
           ),
           BotonAzul(
               text: 'Registrarme',
-              onPressed: () {
-                print(emailCtrl.text);
-              }),
+              onPressed: authService.autenticando
+                  ? null
+                  : () async {
+                      FocusScope.of(context).unfocus();
+                      final registroOk = await authService.register(
+                          nameCtrl.text,
+                          emailCtrl.text.trim(),
+                          passCtrl.text.trim());
+                      if (registroOk == true) {
+                        //TODO Conectar a nuestro socket server
+                        Navigator.pushReplacementNamed(context, 'usuarios');
+                      } else {
+                        mostrarAlerta(context, 'Registro incorrecto',
+                            registroOk.toString());
+                      }
+                    }),
         ],
       ),
     );
